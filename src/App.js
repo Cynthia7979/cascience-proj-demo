@@ -1,26 +1,46 @@
-import { Button } from 'antd';
-import getResult from './api';
-import { execFile } from 'child_process';
-import { DragUpload } from './upload_component';
+import React from 'react';
+import {Button} from 'antd';
+import socketIOClient from 'socket.io-client';
 import './App.css';
 
-function App() {
-  const child = execFile('node', ['--version'], (error, stdout, stderr) => {
-    if (error) {
-      throw error;
+
+class App extends React.Component {
+    state = {
+        child: null,
+        socket: socketIOClient("http://localhost:1616"),
+        data: null
     }
-    console.log(stdout);
-  });
-  return (
-    <div>
-      <DragUpload />
-      {/* <Button
-        onClick={getResult}
-      >
-        Communicate with API
-      </Button> */}
-    </div>
-  );
+
+    componentDidMount() {
+        // this.state.child.stdout.on('data', function (data) {
+        //     console.log(data.toString());
+        // });
+        // this.state.child.stdin.write('Msg from Node.js');
+        const { socket } = this.state;
+        socket.on('data', (data) => { // listen to news event raised by the server
+            console.log(data);
+            this.setState({data: data});
+        });
+        socket.on('connect_error', () => {console.log('ERROR!')})
+    }
+
+    async sendRequest() {
+        await this.state.socket.emit('event', {hello: 'world'});
+        console.log('sent!');
+    }
+
+    render() {
+        console.log(this.state.data);
+        return (
+            <div>
+                <br/>
+
+                <Button onClick={async () => this.sendRequest()}>
+                    Click Me
+                </Button>
+            </div>
+        );
+    }
 }
 
 export default App;
