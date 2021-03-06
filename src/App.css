@@ -1,1 +1,12 @@
 @import '~antd/dist/antd.css';
+
+body {
+    padding: 33px;
+}
+
+.ant-spin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
