@@ -1,10 +1,11 @@
 const spawn = require('child_process').spawn;
+const process = require('process');
 
 // Connect to model
 const model = spawn('obj-detect_demo_2020-2021.exe', ['./module.pt']);
 var loaded = false;
 
-console.log("CWD: "+require('process').cwd());
+console.log("CWD: "+process.cwd());
 
 // Build HTTP server
 var http = require('http');
@@ -38,6 +39,7 @@ model.stdout.on('data', (raw) => {
 });
 model.on('exit', (code) => {
     console.log(`model exited with code ${code}`);
+    process.exit();
 });
 
 function ab2str(buf) {
@@ -55,9 +57,14 @@ io.on('connection', (socket) => {
         console.log('Data received from client:'+JSON.stringify(data));
         switch (data.type) {
             case 'tensor':
-                model.stdin.write(JSON.stringify(data.data));
+                model.stdin.write(data.data);
+                socket.emit('data', {type: 'event', data: 'received'});
         }
     });
+    socket.on('disconnect', (reason) => {
+        model.stdout.removeAllListeners();
+        console.log('Disconnected due to '+reason);
+    })
 
     // Build model IO logic
     model.stdout.on('data', (raw) => {
@@ -71,7 +78,8 @@ io.on('connection', (socket) => {
             case 'tensor':
                 socket.emit('data', {
                     type: 'pred', 
-                    data: ['Rock', 'Paper', 'Scissors'][data.data.indexOf(1)]
+                    // data: ['Rock', 'Paper', 'Scissors'][data.data.indexOf(1)]
+                    data: data.data
                 });
                 break;
             case 'event':

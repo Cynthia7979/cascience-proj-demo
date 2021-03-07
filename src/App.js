@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, message, Spin } from 'antd';
+import { message, Spin } from 'antd';
 import WebCamWebAPI from './camera';
 import socketIOClient from 'socket.io-client';
 import * as tf from '@tensorflow/tfjs';
@@ -15,6 +15,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        console.log('ComponentDidMount');
         const { socket } = this.state;
         socket.on('data', (data) => {
             console.log(data);
@@ -27,7 +28,7 @@ class App extends React.Component {
                         this.setState({ loaded: true });
                         setInterval(() => {
                             this.sendFrame();
-                        }, 5000);
+                        }, 10000);
                     }
                     break;
                 default:
@@ -38,7 +39,7 @@ class App extends React.Component {
 
     }
 
-    sendFrame() {
+    async sendFrame() {
         console.log('Getting frame');
         const video = document.getElementById("video");
         var canvas = document.createElement("canvas");
@@ -48,8 +49,11 @@ class App extends React.Component {
             .drawImage(video, 0, 0, canvas.width, canvas.height);
         try {
             const tensor = tf.browser.fromPixels(canvas);
-            this.state.socket.emit('data', { type: 'tensor', data: tensor });
+            const arrayTensor = await tensor.data();
+            this.state.socket.emit('data', { type: 'tensor', data: arrayTensor });
+            console.log("Tensor:"+arrayTensor);
         } catch (e) {  // Width 0 error
+            console.log(e);
             return;
         }
         // var img = document.createElement("img");
@@ -60,11 +64,6 @@ class App extends React.Component {
         //         <img id="frame" src={canvas.toDataURL('image/png')} alt=''/>
         //     </div>
         // )
-    }
-
-    async sendRequest() {
-        await this.state.socket.emit('event', {hello: 'world'});
-        console.log('sent!');
     }
 
     render() {
@@ -83,13 +82,8 @@ class App extends React.Component {
             return (
                 <>
                     <br/>
-                    <Button onClick={async () => this.sendRequest()}>
-                        测试socket
-                    </Button>
-                    {this.state.data.type}
                     <WebCamWebAPI/>
                     <h1>Prediction: {this.state.prediction}</h1>
-                    {this.state.image}
                 </>
             );
         }
