@@ -1,11 +1,13 @@
 const spawn = require('child_process').spawn;
+const path = require('path');
 const process = require('process');
 
 // Connect to model
-const model = spawn('obj-detect_demo_2020-2021.exe', ['./module.pt']);
+const model = spawn('obj-detect_demo_2020-2021.exe', [path.join(process.cwd(), 'module.pt')]);
 var loaded = false;
 
 console.log("CWD: "+process.cwd());
+console.log("Module path: "+path.join(process.cwd(), 'module.pt'))
 
 // Build HTTP server
 var http = require('http');
@@ -22,7 +24,7 @@ const io = require("socket.io")(httpServer, {
   });
 httpServer.listen(1616);
 
-// // Basic model IO
+// Basic model IO
 model.stderr.on('data', (data) => {console.log("Error from model: "+data.toString())})
 model.stdout.on('data', (raw) => {
     let { data } = raw.toJSON();
@@ -47,18 +49,37 @@ function ab2str(buf) {
 }
 
 // Connection with frontend
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log('Connection received.');
-    socket.emit('data', { type: 'event', data: 'connected' }); // Tell client it is connected
-    if (loaded) { socket.emit('data', { type: 'event', data: 'loaded' }) }
+    await socket.emit('data', { type: 'event', data: 'connected' }); // Tell client it is connected
+    if (loaded) { await socket.emit('data', { type: 'event', data: 'loaded' }) }
 
     // Backend-Frontend IO
-    socket.on('data', (data) => {  // Receive tensor data from client
+    var currentBuffer = [];
+    socket.on('data', async (data) => {  // Receive tensor data from client
         console.log('Data received from client:'+JSON.stringify(data));
         switch (data.type) {
-            case 'tensor':
-                model.stdin.write(data.data);
-                socket.emit('data', {type: 'event', data: 'received'});
+            case 'tensorBuffer':
+                const toWrite = data.data.replaceAll('\n', '');
+                model.stdin.write(toWrite);
+                // currentBuffer.push(data.data);
+                // await socket.emit('data', {type: 'event', data: 'received'});
+                break;
+            case 'event':
+                switch (data.data) {
+                    case 'transfer start':
+                        model.stdin.write('{"type": "tensor", "data": "[');
+                        break;
+                    case 'transfer complete':
+                        // model.stdin.write(currentBuffer.join());
+                        model.stdin.write(']"}\n');
+                        await socket.emit('data', {type: 'event', data: 'received'});
+                        currentBuffer = [];
+                        break;
+                    default: break;
+                }
+                break;
+            default: break;
         }
     });
     socket.on('disconnect', (reason) => {

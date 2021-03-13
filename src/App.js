@@ -27,7 +27,7 @@ class App extends React.Component {
                     if (data.data === 'loaded') {  // Model loaded
                         this.setState({ loaded: true });
                         setInterval(() => {
-                            this.sendFrame();
+                            this.getFrame();
                         }, 10000);
                     }
                     break;
@@ -39,7 +39,7 @@ class App extends React.Component {
 
     }
 
-    async sendFrame() {
+    async getFrame() {
         console.log('Getting frame');
         const video = document.getElementById("video");
         var canvas = document.createElement("canvas");
@@ -50,8 +50,10 @@ class App extends React.Component {
         try {
             const tensor = tf.browser.fromPixels(canvas);
             const arrayTensor = await tensor.data();
-            this.state.socket.emit('data', { type: 'tensor', data: arrayTensor });
-            console.log("Tensor:"+arrayTensor);
+            await this.sendFrame(arrayTensor, 1024);
+            await this.state.socket.emit('data', { type: 'event', data: 'transfer complete' });
+            console.log('Send complete');
+            // console.log("Tensor:"+arrayTensor);
         } catch (e) {  // Width 0 error
             console.log(e);
             return;
@@ -64,6 +66,19 @@ class App extends React.Component {
         //         <img id="frame" src={canvas.toDataURL('image/png')} alt=''/>
         //     </div>
         // )
+    }
+
+    async sendFrame(frame, bufferSize) {
+        const stringTensor = frame.toString();
+        var startIndex, endIndex;
+        console.log(stringTensor);
+        await this.state.socket.emit('data', { type: 'event', data: 'transfer start'});
+        for (let i=0; i < stringTensor.length; i+=bufferSize) {
+            startIndex = i;
+            endIndex = i + bufferSize;
+            if (endIndex > stringTensor.length) endIndex = stringTensor.length;
+            await this.state.socket.emit('data', { type: 'tensorBuffer', data: stringTensor.slice(startIndex, endIndex)});
+        }
     }
 
     render() {
