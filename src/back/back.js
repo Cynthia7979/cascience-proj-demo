@@ -57,10 +57,10 @@ io.on('connection', async (socket) => {
     // Backend-Frontend IO
     var currentBuffer = [];
     socket.on('data', async (data) => {  // Receive tensor data from client
-        console.log('Data received from client:'+JSON.stringify(data));
+        // console.log('Data received from client:'+JSON.stringify(data));
         switch (data.type) {
             case 'tensorBuffer':
-                const toWrite = data.data.replaceAll('\n', '');
+                const toWrite = data.data.replace('\n\g', '');
                 model.stdin.write(toWrite);
                 // currentBuffer.push(data.data);
                 // await socket.emit('data', {type: 'event', data: 'received'});
@@ -68,11 +68,11 @@ io.on('connection', async (socket) => {
             case 'event':
                 switch (data.data) {
                     case 'transfer start':
-                        model.stdin.write('{"type": "tensor", "data": "[');
+                        model.stdin.write('{"type": "tensor", "data": [');
                         break;
                     case 'transfer complete':
                         // model.stdin.write(currentBuffer.join());
-                        model.stdin.write(']"}\n');
+                        model.stdin.write(']}\n');
                         await socket.emit('data', {type: 'event', data: 'received'});
                         currentBuffer = [];
                         break;
