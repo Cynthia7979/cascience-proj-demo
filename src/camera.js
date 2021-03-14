@@ -53,7 +53,7 @@ export default class WebCamWebAPI extends React.Component{
         //打开新选择摄像头
         if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
             //调用用户媒体设备, 访问摄像头
-            this.getUserMedia({video : {width: 1440, height: 960,deviceId : {exact : deviceId}}}, this.success, this.error);
+            this.getUserMedia({video : {width: 224, height: 224,deviceId : {exact : deviceId}}}, this.success, this.error);
         } else {
             message.info('不支持访问媒体');
         }
