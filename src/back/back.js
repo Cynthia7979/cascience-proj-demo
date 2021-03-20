@@ -62,10 +62,10 @@ io.on('connection', async (socket) => {
         switch (data.type) {
             case 'tensor':
                 console.log('Received array tensor data');
-                fs.writeFile('./mockstdin.dat', JSON.stringify(data.data), (err) => {if (err) throw err});
-                model.stdin.write(JSON.stringify(data.data));
-                model.stdin.write('\n');
+                fs.writeFile('./mockstdin.dat', JSON.stringify(data.data)+'\n', (err) => {if (err) throw err});
+                model.stdin.write(JSON.stringify(data.data)+'\n');
                 break;
+            // History code ↓
             case 'tensorBuffer':
                 const toWrite = data.data.replace('\n\g', '');
                 model.stdin.write(toWrite);
