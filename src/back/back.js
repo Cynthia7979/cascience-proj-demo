@@ -41,8 +41,8 @@ model.stdout.on('data', (raw) => {
     } else console.log("Not an event");
 });
 model.on('exit', (code) => {
-    console.log(`model exited with code ${code}`);
-    process.exit();
+    console.log(`FATAL: model exited with code ${code}`);
+    // process.exit();
 });
 
 function ab2str(buf) {
