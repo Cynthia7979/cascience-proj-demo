@@ -3,7 +3,6 @@ torch_cpu.zip
 module.pt
 *.dll
 *.dat
-obj-detect_demo_2020_2021.exe
 *.exe
 *.lib
 *.pdb
