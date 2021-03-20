@@ -96,27 +96,32 @@ io.on('connection', async (socket) => {
 
     // Build model IO logic
     model.stdout.on('data', (raw) => {
-        socket.emit('data', { type: 'forward', data: raw });  // Forward package for debugging
-        let { data } = raw.toJSON();
-        data = JSON.parse(ab2str(data));  // Convert Buffer to JSON
-        console.log('Model-Socket IO listening:'+JSON.stringify(data));
-        console.log(`type=${data.type}, data=${(data.data)}`)
-
-        switch (data.type) {
-            case 'tensor':
-                socket.emit('data', {
-                    type: 'pred', 
-                    // data: ['Rock', 'Paper', 'Scissors'][data.data.indexOf(1)]
-                    data: data.data
-                });
-                break;
-            case 'event':
-                if (data.data == 'loaded') {
-                    socket.emit('data', { type: 'event', data: 'loaded'});
-                    loaded = true;
-                }
-            default: break;
+        try {
+            socket.emit('data', { type: 'forward', data: raw });  // Forward package for debugging
+            let { data } = raw.toJSON();
+            data = JSON.parse(ab2str(data));  // Convert Buffer to JSON
+            console.log('Model-Socket IO listening:'+JSON.stringify(data));
+            console.log(`type=${data.type}, data=${(data.data)}`)
+    
+            switch (data.type) {
+                case 'tensor':
+                    socket.emit('data', {
+                        type: 'pred', 
+                        // data: ['Rock', 'Paper', 'Scissors'][data.data.indexOf(1)]
+                        data: data.data
+                    });
+                    break;
+                case 'event':
+                    if (data.data == 'loaded') {
+                        socket.emit('data', { type: 'event', data: 'loaded'});
+                        loaded = true;
+                    }
+                default: break;
+            }
+        } catch (SyntaxError) {
+            console.log(ab2str(raw.toJSON()));
         }
+
     })
 });
 
