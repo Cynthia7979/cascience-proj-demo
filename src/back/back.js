@@ -28,17 +28,22 @@ httpServer.listen(1616);
 // Basic model IO
 model.stderr.on('data', (data) => {console.log("Error from model: "+data.toString())})
 model.stdout.on('data', (raw) => {
-    let { data } = raw.toJSON();
-    data = JSON.parse(ab2str(data));  // Convert Buffer to JSON
-    console.log('basicIO listening:', data);
-    console.log('type:'+data.type);
-    if (data.type == 'event') {
-        console.log('It is an event');
-        if (data.data == 'loaded') {
-            loaded = true;
-            console.log('Loaded set to true');
-        }
-    } else console.log("Not an event");
+    try {
+        let { data } = raw.toJSON();
+        data = JSON.parse(ab2str(data));  // Convert Buffer to JSON
+        console.log('basicIO listening:', data);
+        console.log('type:'+data.type);
+        if (data.type == 'event') {
+            console.log('It is an event');
+            if (data.data == 'loaded') {
+                loaded = true;
+                console.log('Loaded set to true');
+            }
+        } else console.log("Not an event");
+    } catch {
+        console.log('debug message:'+abs2str(raw.toJSON()));
+    }
+    
 });
 model.on('exit', (code) => {
     console.log(`FATAL: model exited with code ${code}`);
@@ -118,8 +123,8 @@ io.on('connection', async (socket) => {
                     }
                 default: break;
             }
-        } catch (SyntaxError) {
-            console.log(ab2str(raw.toJSON()));
+        } catch {
+            console.log('debug message:'+ab2str(raw.toJSON()));
         }
 
     })
