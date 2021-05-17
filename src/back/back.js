@@ -25,6 +25,32 @@ const io = require("socket.io")(httpServer, {
   });
 httpServer.listen(1616);
 
+function JSONtoArrayString(j) {
+    // 空格分隔的数组，一维数组间空一行（/n/n），二维数组间空两行（/n/n/n）
+    // 如：[[[1,2,3], [4,5,6]], [[7,8,9], [10,11,12]]]
+    // 将被转换为如下str：
+    // 1 2 3
+    //
+    // 4 5 6
+    //
+    //
+    // 7 8 9
+    //
+    // 10 11 12
+    //
+    var arrayString = '';
+    for (let i=0; i++; i<j.length) {
+        console.log(arrayString);
+        for (let k=0; k++; k<j[i].length) {
+            console.log(arrayString);
+            arrayString += j[i].join(' ');
+            arrayString += '\n\n';
+        }
+        arrayString += '\n';
+    }
+    return arrayString;
+}
+
 // Basic model IO
 model.stderr.on('data', (data) => {console.log("Error from model: "+data.toString())})
 model.stdout.on('data', (raw) => {
@@ -67,8 +93,9 @@ io.on('connection', async (socket) => {
         switch (data.type) {
             case 'tensor':
                 console.log('Received array tensor data');
-                fs.writeFile('./mockstdin.dat', JSON.stringify(data.data)+'\n', (err) => {if (err) throw err});
-                model.stdin.write(JSON.stringify(data.data)+'\n');
+                // TODO
+                // fs.writeFile('./mockstdin.dat', JSON.stringify(data.data)+'\n', (err) => {if (err) throw err});
+                // model.stdin.write(JSON.stringify(data.data)+'\n');
                 break;
             // History code ↓
             case 'tensorBuffer':
