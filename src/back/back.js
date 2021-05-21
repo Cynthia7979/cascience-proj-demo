@@ -25,29 +25,21 @@ const io = require("socket.io")(httpServer, {
   });
 httpServer.listen(1616);
 
-function JSONtoArrayString(j) {
-    // 空格分隔的数组，一维数组间空一行（/n/n），二维数组间空两行（/n/n/n）
+async function JSONtoArrayString(j) {
+    // 三维数组拉成一维，空格分隔的数组
     // 如：[[[1,2,3], [4,5,6]], [[7,8,9], [10,11,12]]]
     // 将被转换为如下str：
-    // 1 2 3
-    //
-    // 4 5 6
-    //
-    //
-    // 7 8 9
-    //
-    // 10 11 12
-    //
+    // "1 2 3 4 5 6 7 8 9 10 11 12\n"
     var arrayString = '';
-    for (let i=0; i++; i<j.length) {
+    for await (let i=0; i++; i<j.length) {
         console.log(arrayString);
-        for (let k=0; k++; k<j[i].length) {
+        for await (let k=0; k++; k<j[i].length) {
             console.log(arrayString);
             arrayString += j[i].join(' ');
-            arrayString += '\n\n';
         }
-        arrayString += '\n';
+        arrayString += ' ';
     }
+    arrayString += '\n';
     return arrayString;
 }
 
