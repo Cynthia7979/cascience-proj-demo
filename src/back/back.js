@@ -29,15 +29,15 @@ async function JSONtoArrayString(j) {
     // 三维数组拉成一维，空格分隔的数组
     // 如：[[[1,2,3], [4,5,6]], [[7,8,9], [10,11,12]]]
     // 将被转换为如下str：
-    // "1 2 3 4 5 6 7 8 9 10 11 12\n"
+    // "1 2 3 4 5 6 7 8 9 10 11 12 \n"
     var arrayString = '';
-    for await (let i=0; i++; i<j.length) {
+    for await (let twoDArray of j) {
         console.log(arrayString);
-        for await (let k=0; k++; k<j[i].length) {
-            console.log(arrayString);
-            arrayString += j[i].join(' ');
+        for await (let oneDArray of twoDArray) {
+            arrayString += oneDArray.join(' ');
+            console.log(arrayString);            
+            arrayString += ' ';
         }
-        arrayString += ' ';
     }
     arrayString += '\n';
     return arrayString;
@@ -85,8 +85,9 @@ io.on('connection', async (socket) => {
         switch (data.type) {
             case 'tensor':
                 console.log('Received array tensor data');
-                // TODO
-                // fs.writeFile('./mockstdin.dat', JSON.stringify(data.data)+'\n', (err) => {if (err) throw err});
+                let arrayString = await JSONtoArrayString(data.data);
+                model.stdin.write(arrayString);
+                fs.writeFile('./mockstdin.dat', arrayString, (err) => {if (err) throw err});
                 // model.stdin.write(JSON.stringify(data.data)+'\n');
                 break;
             // History code ↓

@@ -9,11 +9,11 @@ function tensor2array_3d_helper(tensor){
     // transfer the 3d-tf.tensor to 3d-jsarray
     const _1darray = Array.from(tensor.dataSync());
     const [m,n_h,n_w] = [3, 224, 224];
-    const _3darray = new Array();
+    const _3darray = [];
     for(let i = 0; i < m; i++){
         let demo = new Array(n_h);
         for(let j = 0; j < n_h; j++){
-            demo[j] = new Array();
+            demo[j] = [];
             for(let k = 0; k < n_w; k++){
                 demo[j][k] = _1darray[i*n_h*n_w + j*n_w + k];
             }
