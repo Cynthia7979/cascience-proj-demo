@@ -42,7 +42,7 @@ class App extends React.Component {
             console.log(data);
             switch (data.type) {
                 case 'pred':
-                    this.setState({prediction: data.data});
+                    this.setState({prediction: JSON.stringify(data)});
                     break;
                 case 'event':
                     if (data.data === 'loaded') {  // Model loaded

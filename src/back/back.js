@@ -5,7 +5,7 @@ const process = require('process');
 
 // Connect to model
 const model = spawn('obj-detect_demo_2020-2021.exe', [path.join(process.cwd(), 'module.pt')]);
-var loaded = false;
+var loaded = true;
 
 console.log("CWD: "+process.cwd());
 console.log("Module path: "+path.join(process.cwd(), 'module.pt'))
@@ -32,10 +32,8 @@ async function JSONtoArrayString(j) {
     // "1 2 3 4 5 6 7 8 9 10 11 12 \n"
     var arrayString = '';
     for await (let twoDArray of j) {
-        console.log(arrayString);
         for await (let oneDArray of twoDArray) {
             arrayString += oneDArray.join(' ');
-            console.log(arrayString);            
             arrayString += ' ';
         }
     }
@@ -44,23 +42,24 @@ async function JSONtoArrayString(j) {
 }
 
 // Basic model IO
-model.stderr.on('data', (data) => {console.log("Error from model: "+data.toString())})
+model.stderr.on('data', (data) => {console.log(data.toString())})
 model.stdout.on('data', (raw) => {
-    try {
-        let { data } = raw.toJSON();
-        data = JSON.parse(ab2str(data));  // Convert Buffer to JSON
-        console.log('basicIO listening:', data);
-        console.log('type:'+data.type);
-        if (data.type == 'event') {
-            console.log('It is an event');
-            if (data.data == 'loaded') {
-                loaded = true;
-                console.log('Loaded set to true');
-            }
-        } else console.log("Not an event");
-    } catch {
-        console.log('debug message:'+abs2str(raw.toJSON()));
-    }
+    // try {
+    //     let { data } = raw.toJSON();
+    //     data = JSON.parse(ab2str(data));  // Convert Buffer to JSON
+    //     console.log('basicIO listening:', data);
+    //     console.log('type:'+data.type);
+    //     if (data.type == 'event') {
+    //         console.log('It is an event');
+    //         if (data.data == 'loaded') {
+    //             loaded = true;
+    //             console.log('Loaded set to true');
+    //         }
+    //     } else console.log("Not an event");
+    // } catch {
+    //     console.log('debug message:'+abs2str(raw.toJSON()));
+    // }
+    console.log(raw);
     
 });
 model.on('exit', (code) => {
@@ -120,29 +119,22 @@ io.on('connection', async (socket) => {
     })
 
     // Build model IO logic
-    model.stdout.on('data', (raw) => {
+    model.stdout.on('data', async (raw) => {
         try {
             socket.emit('data', { type: 'forward', data: raw });  // Forward package for debugging
-            let { data } = raw.toJSON();
-            data = JSON.parse(ab2str(data));  // Convert Buffer to JSON
-            console.log('Model-Socket IO listening:'+JSON.stringify(data));
-            console.log(`type=${data.type}, data=${(data.data)}`)
-    
-            switch (data.type) {
-                case 'tensor':
-                    socket.emit('data', {
-                        type: 'pred', 
-                        // data: ['Rock', 'Paper', 'Scissors'][data.data.indexOf(1)]
-                        data: data.data
-                    });
-                    break;
-                case 'event':
-                    if (data.data == 'loaded') {
-                        socket.emit('data', { type: 'event', data: 'loaded'});
-                        loaded = true;
-                    }
-                default: break;
+            console.log('Model-Socket IO listening:'+ab2str(JSON.stringify(raw)));
+            let data = ab2str(raw).split();
+            console.log('data'+data);
+            let number_data = [];
+            for await (let i of data) {
+                number_data.push(i * 1);
             }
+            let pred = ['Rock', 'Paper', 'Scissors'][data.indexOf(Math.max(...number_data))];
+            console.log('pred:'+pred);
+            socket.emit('data', {
+                type: 'pred', 
+                data: pred
+            });
         } catch {
             console.log('debug message:'+ab2str(raw.toJSON()));
         }
