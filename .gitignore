@@ -1,12 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-torch_cpu.zip
-module.pt
-*.dll
 *.dat
-*.exe
-*.lib
-*.pdb
-*.exp
+module.pkl
+.ipynb_checkpoints/
+__pycache__/
 
 # dependencies
 /node_modules
