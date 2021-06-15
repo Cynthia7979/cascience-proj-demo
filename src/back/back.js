@@ -89,27 +89,6 @@ io.on('connection', async (socket) => {
                 fs.writeFile('./mockstdin.dat', arrayString, (err) => {if (err) throw err});
                 // model.stdin.write(JSON.stringify(data.data)+'\n');
                 break;
-            // History code ↓
-            case 'tensorBuffer':
-                const toWrite = data.data.replace('\n\g', '');
-                model.stdin.write(toWrite);
-                // currentBuffer.push(data.data);
-                // await socket.emit('data', {type: 'event', data: 'received'});
-                break;
-            case 'event':
-                switch (data.data) {
-                    case 'transfer start':
-                        model.stdin.write('{"type": "tensor", "data": [');
-                        break;
-                    case 'transfer complete':
-                        // model.stdin.write(currentBuffer.join());
-                        model.stdin.write(']}\n');
-                        await socket.emit('data', {type: 'event', data: 'received'});
-                        currentBuffer = [];
-                        break;
-                    default: break;
-                }
-                break;
             default: break;
         }
     });
@@ -127,7 +106,7 @@ io.on('connection', async (socket) => {
             console.log('data'+data);
             let number_data = [];
             for await (let i of data) {
-                number_data.push(i * 1);
+                number_data.push(i * 1);  // To numbers
             }
             let pred = ['Rock', 'Paper', 'Scissors'][data.indexOf(Math.max(...number_data))];
             console.log('pred:'+pred);
