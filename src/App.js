@@ -29,7 +29,8 @@ function tensor2array_3d_helper(tensor){
 
 class App extends React.Component {
     state = {
-        socket: socketIOClient("http://localhost:1616"),
+        //socket: socketIOClient("http://localhost:1616"), // old code
+        socket: socketIOClient("http://localhost:6666"),
         data: '',
         prediction: 'null',
         loaded: false,
@@ -70,16 +71,12 @@ class App extends React.Component {
             .drawImage(video, 0, 0, canvas.width, canvas.height);
         try {
             const tensor = tf.browser.fromPixels(canvas);
-            // const arrayTensor = await tensor.data();
             const arrayTensor = tensor2array_3d_helper(tensor);
             console.log('Shape:'+arrayTensor.length);
             console.log(arrayTensor);
-            // await this.sendFrame(arrayTensor, 1024);
             await this.state.socket.emit('data', { type: 'tensor', data: arrayTensor});
-            // await this.state.socket.emit('data', { type: 'event', data: 'transfer complete' });
             console.log('Send complete');
-            // console.log("Tensor:"+arrayTensor);
-        } catch (e) {  // Width 0 error
+        } catch (e) {  // Width 0 error as the result of not loading successfully
             console.log(e);
             return;
         }
@@ -92,19 +89,6 @@ class App extends React.Component {
         //     </div>
         // )
     }
-
-    // async sendFrame(frame, bufferSize) {
-    //     const stringTensor = frame.toJSON();
-    //     var startIndex, endIndex;
-    //     console.log(stringTensor);
-    //     await this.state.socket.emit('data', { type: 'event', data: 'transfer start'});
-    //     for (let i=0; i < stringTensor.length; i+=bufferSize) {
-    //         startIndex = i;
-    //         endIndex = i + bufferSize;
-    //         if (endIndex > stringTensor.length) endIndex = stringTensor.length;
-    //         await this.state.socket.emit('data', { type: 'tensorBuffer', data: stringTensor.slice(startIndex, endIndex)});
-    //     }
-    // }
 
     render() {
         const { loaded } = this.state;
