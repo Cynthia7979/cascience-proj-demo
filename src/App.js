@@ -30,7 +30,7 @@ function tensor2array_3d_helper(tensor){
 class App extends React.Component {
     state = {
         //socket: socketIOClient("http://localhost:1616"), // old code
-        socket: socketIOClient("http://localhost:12345"),
+        socket: socketIOClient("http://127.0.0.1:12345"),
         data: '',
         prediction: 'null',
         loaded: false,
