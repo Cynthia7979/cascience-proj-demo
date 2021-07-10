@@ -30,7 +30,7 @@ function tensor2array_3d_helper(tensor){
 class App extends React.Component {
     state = {
         //socket: socketIOClient("http://localhost:1616"), // old code
-        socket: socketIOClient("http://localhost:6666"),
+        socket: socketIOClient("http://localhost:12345"),
         data: '',
         prediction: 'null',
         loaded: false,
@@ -72,7 +72,7 @@ class App extends React.Component {
         // Retrieve RGB data
         var context = document.getElementById('myCanvas').getContext('2d');
         // Get the CanvasPixelArray from the given coordinates and dimensions.
-        var imgd = context.getImageData(x, y, width, height);
+        var imgd = context.getImageData(0, 0, 224, 224);
         var pix = imgd.data;
         // Loop over each pixel and invert the color.
         for (var i = 0, n = pix.length; i < n; i += 4) {
@@ -88,7 +88,7 @@ class App extends React.Component {
             // console.log(arrayTensor);
 
             // Draw the ImageData at the given (x,y) coordinates.
-            context.putImageData(imgd, x, y);
+            // context.putImageData(imgd, x, y);
             await this.state.socket.emit('data', { type: 'tensor', data: pix});
             console.log('Send complete');
         } catch (e) {  // Width 0 error as the result of not loading successfully
