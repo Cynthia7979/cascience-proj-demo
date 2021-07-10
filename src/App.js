@@ -29,7 +29,8 @@ function tensor2array_3d_helper(tensor){
 
 class App extends React.Component {
     state = {
-        socket: socketIOClient("http://localhost:1616"),
+        //socket: socketIOClient("http://localhost:1616"), // old code
+        socket: socketIOClient("http://localhost:6666"),
         data: '',
         prediction: 'null',
         loaded: false,
@@ -66,20 +67,31 @@ class App extends React.Component {
         var canvas = document.createElement("canvas");
         canvas.width = 224;
         canvas.height = 224;  // Video dimensions. See camera.js
-        canvas.getContext('2d')
-            .drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Retrieve RGB data
+        var context = document.getElementById('myCanvas').getContext('2d');
+        // Get the CanvasPixelArray from the given coordinates and dimensions.
+        var imgd = context.getImageData(x, y, width, height);
+        var pix = imgd.data;
+        // Loop over each pixel and invert the color.
+        for (var i = 0, n = pix.length; i < n; i += 4) {
+            pix[i  ] = 255 - pix[i  ]; // red
+            pix[i+1] = 255 - pix[i+1]; // green
+            pix[i+2] = 255 - pix[i+2]; // blue
+            // i+3 is alpha (the fourth element)
+        }
         try {
-            const tensor = tf.browser.fromPixels(canvas);
-            // const arrayTensor = await tensor.data();
-            const arrayTensor = tensor2array_3d_helper(tensor);
-            console.log('Shape:'+arrayTensor.length);
-            console.log(arrayTensor);
-            // await this.sendFrame(arrayTensor, 1024);
-            await this.state.socket.emit('data', { type: 'tensor', data: arrayTensor});
-            // await this.state.socket.emit('data', { type: 'event', data: 'transfer complete' });
+            // const tensor = tf.browser.fromPixels(canvas);
+            // const arrayTensor = tensor2array_3d_helper(tensor);
+            // console.log('Shape:'+arrayTensor.length);
+            // console.log(arrayTensor);
+
+            // Draw the ImageData at the given (x,y) coordinates.
+            context.putImageData(imgd, x, y);
+            await this.state.socket.emit('data', { type: 'tensor', data: pix});
             console.log('Send complete');
-            // console.log("Tensor:"+arrayTensor);
-        } catch (e) {  // Width 0 error
+        } catch (e) {  // Width 0 error as the result of not loading successfully
             console.log(e);
             return;
         }
@@ -92,19 +104,6 @@ class App extends React.Component {
         //     </div>
         // )
     }
-
-    // async sendFrame(frame, bufferSize) {
-    //     const stringTensor = frame.toJSON();
-    //     var startIndex, endIndex;
-    //     console.log(stringTensor);
-    //     await this.state.socket.emit('data', { type: 'event', data: 'transfer start'});
-    //     for (let i=0; i < stringTensor.length; i+=bufferSize) {
-    //         startIndex = i;
-    //         endIndex = i + bufferSize;
-    //         if (endIndex > stringTensor.length) endIndex = stringTensor.length;
-    //         await this.state.socket.emit('data', { type: 'tensorBuffer', data: stringTensor.slice(startIndex, endIndex)});
-    //     }
-    // }
 
     render() {
         const { loaded } = this.state;
