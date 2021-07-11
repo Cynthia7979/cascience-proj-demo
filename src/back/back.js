@@ -4,7 +4,7 @@ const path = require('path');
 const process = require('process');
 
 // Connect to model
-const model = spawn('obj-detect_demo_2020-2021.exe', [path.join(process.cwd(), 'module.pt')]);
+const model = spawn('python', [path.join(process.cwd(), 'Model.py')]);
 var loaded = true;
 
 console.log("CWD: "+process.cwd());
