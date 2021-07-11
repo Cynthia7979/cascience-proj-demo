@@ -87,9 +87,11 @@ class App extends React.Component {
             // console.log('Shape:'+arrayTensor.length);
             // console.log(arrayTensor);
 
+
             // Draw the ImageData at the given (x,y) coordinates.
-            // context.putImageData(imgd, x, y);
-            await this.state.socket.emit('data', { type: 'tensor', data: pix});
+            context.putImageData(imgd, x, y);
+            // await this.state.socket.emit('data', { type: 'tensor', data: pix});
+            await this.sendFrame(pix, 512);
             console.log('Send complete');
         } catch (e) {  // Width 0 error as the result of not loading successfully
             console.log(e);
@@ -103,6 +105,20 @@ class App extends React.Component {
         //         <img id="frame" src={canvas.toDataURL('image/png')} alt=''/>
         //     </div>
         // )
+    }
+
+    async sendFrame(frame, bufferSize) {
+        const stringTensor = frame.toJSON();
+        var startIndex, endIndex;
+        console.log(stringTensor);
+        await this.state.socket.emit('data', { type: 'event', data: 'transfer start'});
+        for (let i=0; i < stringTensor.length; i+=bufferSize) {
+            startIndex = i;
+            endIndex = i + bufferSize;
+            if (endIndex > stringTensor.length) endIndex = stringTensor.length;
+            await this.state.socket.emit('data', { type: 'tensorBuffer', data: stringTensor.slice(startIndex, endIndex)});
+        }
+        await this.state.socket.emit('data', {type: 'event', data: 'transfer end'});
     }
 
     render() {

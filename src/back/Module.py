@@ -5,21 +5,16 @@ from VGG16 import VGG16
 from PIL import Image
 import numpy as np
 import json
-import socket
-import torch
-import torchvision.transforms as transforms
-from VGG16 import VGG16
-from PIL import Image
-import numpy as np
-import json
 
 labels = ['Paper', 'Rock', 'Scissor']
 path = ''
+
 def readImage(data):
     data = np.reshape(data, (224,224))
     img = Image.fromarray(data)
 #     img = Image.open(str(path)).convert('RGB')
     return img
+
 def preprocessImage(img):
     show_process = transforms.Compose([
         transforms.CenterCrop(224)
