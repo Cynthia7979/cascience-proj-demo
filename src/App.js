@@ -87,6 +87,7 @@ class App extends React.Component {
             // console.log('Shape:'+arrayTensor.length);
             // console.log(arrayTensor);
 
+
             // Draw the ImageData at the given (x,y) coordinates.
             context.putImageData(imgd, x, y);
             // await this.state.socket.emit('data', { type: 'tensor', data: pix});

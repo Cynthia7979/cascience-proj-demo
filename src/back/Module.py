@@ -5,21 +5,18 @@ from VGG16 import VGG16
 from PIL import Image
 import numpy as np
 import json
-import socket
-import torch
-import torchvision.transforms as transforms
-from VGG16 import VGG16
-from PIL import Image
-import numpy as np
-import json
 
 labels = ['Paper', 'Rock', 'Scissor']
 path = ''
+
+
 def readImage(data):
     data = np.reshape(data, (224,224))
     img = Image.fromarray(data)
 #     img = Image.open(str(path)).convert('RGB')
     return img
+
+
 def preprocessImage(img):
     show_process = transforms.Compose([
         transforms.CenterCrop(224)
@@ -33,8 +30,9 @@ def preprocessImage(img):
     tensor = preprocess(img)
     return tensor
 
+
 flag = 0
-buffer = np.zeros((0))
+buffer = np.zeros(0)
 # communication
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind(('127.0.0.1', 12345))
@@ -82,4 +80,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 # receiving
                 if data['type'] == 'tensorBuffer' and flag:
                     buffer.append(np.array(data['data']))
+
 print('Connection closed.')
