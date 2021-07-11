@@ -17,7 +17,7 @@ WHITE = (255, 255, 255)
 
 def main():
     print('Starting')
-    capture = VideoCapture(1+CAP_DSHOW)
+    capture = VideoCapture(0)
 
     # init module
     module = torch.load('module.pkl', map_location=torch.device('cpu'))
@@ -30,18 +30,19 @@ def main():
         print(frame.shape)
         if waitKey(1) & 0xFF == ord('q'):  # 对不起 我孤陋寡闻.jpg
             break
-        print(frame)
         output, prediction = predict(preprocessImage(readImage(frame)), module)
+        rectangle(frame,
+                  (208, 128), (432, 352), (77,77,77), thickness=5)
         putText(frame, prediction,
-                0, 0,
-                FONT, color=BLACK, thickness=2, lineType=LINE_AA)
-
+                (30, 30),
+                FONT, 1, color=BLACK, thickness=2, lineType=LINE_AA)
+        
         imshow('demo', frame)
 
 
 def readImage(frame):
-    img = Image.fromarray(frame)
-    img = Image.resize(img)
+    # frame = np.delete(frame, -1, axis=2)
+    img = Image.fromarray(frame).convert('RGB')
     return img
 
 
@@ -60,8 +61,8 @@ def preprocessImage(img):
 
 
 def predict(img, module, labels=('Paper', 'Rock', 'Scissor')) -> (torch.tensor, str):
-    tensor = preprocessImage(img)
-    tensor = torch.unsqueeze(tensor, dim=0)
+    tensor = torch.unsqueeze(img, dim=0)
+    print(tensor.shape)
     with torch.no_grad():
         _, outputs = module(tensor)
         _, predicted = torch.max(outputs.data, 1)
