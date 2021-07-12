@@ -4,7 +4,6 @@ import torchvision.transforms as transforms
 import tensorflow as tf
 from VGG16 import VGG16
 from PIL import Image
-import cv2
 from cv2 import *
 
 import os
@@ -42,7 +41,7 @@ def main():
         if waitKey(1) & 0xFF == ord('q'):  # 对不起 我孤陋寡闻.jpg
             break
         output, prediction = predict(preprocessImage(readImage(frame)), module)
-        frame = video_mirror_output(frame)
+        frame = flip(frame, 1)
         rectangle(frame,
                   (int((cam_width - 224 * 2) / 2), int((cam_height - 224 * 2) / 2)),
                   (int((cam_width - 224 * 2) / 2 + 224 * 2), int((cam_height - 224 * 2) / 2 + 224 * 2)),
@@ -83,6 +82,8 @@ def predict(img, module, labels=('Paper', 'Rock', 'Scissor')) -> (torch.tensor, 
         _, outputs = module(tensor)
         _, predicted = torch.max(outputs.data, 1)
     print('predicted:', labels[predicted])
+    if outputs[0][0] < 0.75 and outputs[0][1] < 0.75 and outputs[0][2] < 0.75:
+        return outputs.data, 'Unknown'
     return outputs.data, labels[predicted]
 
 
