@@ -46,7 +46,7 @@ def main():
         rectangle(frame,
                   (int((cam_width - 224 * 2) / 2), int((cam_height - 224 * 2) / 2)),
                   (int((cam_width - 224 * 2) / 2 + 224 * 2), int((cam_height - 224 * 2) / 2 + 224 * 2)),
-                  (77,77,77), thickness=5)
+                  (0x01,0x3A,0xDF), thickness=20)
         putText(frame, prediction,
                 (30, 30),
                 FONT, 1, color=BLACK, thickness=2, lineType=LINE_AA)
