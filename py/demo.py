@@ -7,22 +7,13 @@ from PIL import Image
 from cv2 import *
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 FONT = FONT_HERSHEY_SIMPLEX
 BLACK = (0  , 0  , 0  )
 WHITE = (255, 255, 255)
 cam_width = 1280
 cam_height = 720
-
-# flip the video
-def video_mirror_output(video):
-    new_img=np.zeros_like(video)
-    h,w=video.shape[0],video.shape[1]
-    for row in range(h):
-        for i in range(w):
-            new_img[row,i] = video[row,w-i-1]
-    return new_img
 
 def main():
     print('Starting')
