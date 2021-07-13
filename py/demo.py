@@ -6,9 +6,6 @@ from VGG16 import VGG16
 from PIL import Image
 from cv2 import *
 
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-
 FONT = FONT_HERSHEY_SIMPLEX
 BLACK = (0  , 0  , 0  )
 WHITE = (255, 255, 255)
@@ -22,7 +19,7 @@ def main():
     capture.set(4, cam_height)  # set height
 
     # init module
-    module = torch.load('module.pkl', map_location=torch.device('cpu'))
+    module = torch.load('module.pkl', map_location=torch.device('cuda'))
     module.eval()
 
     while True:
@@ -31,7 +28,7 @@ def main():
         print(frame.shape)
         if waitKey(1) & 0xFF == ord('q'):  # 对不起 我孤陋寡闻.jpg
             break
-        output, prediction = predict(preprocessImage(readImage(frame)), module)
+        output, prediction = predict(preprocessImage(readImage(frame)).to(torch.device('cuda')), module)
         frame = flip(frame, 1)
         rectangle(frame,
                   (int((cam_width - 224 * 2) / 2), int((cam_height - 224 * 2) / 2)),
