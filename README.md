@@ -1,22 +1,31 @@
 # Chinese Academy of Science Project Demonstration Repo
 
-A React App planned to run local that captures and classifies hand gestures (rock, paper, scissors).
+An OpenCV implemented Python demonstration program planned to run locally that captures and classifies hand gestures (rock, paper, scissors).
 
-`torch_cpu.dll` in `back/` is not uploaded. Download it here: [https://wws.lanzous.com/i5OCblq5l3g](https://wws.lanzous.com/i5OCblq5l3g).
+## Environment (Anaconda based)
 
-Please place the `.dll` and `.exe` files in `/src/back`.
+* Pytorch
+* Torchvision
+* OpenCV
+* Numpy
+* PIL
+* CUDA Toolkit
 
-## Tools
-* React
-* npm
+### GPU Dependencies' Version
+
+| Dependencies or Related Modules | Current Version |
+| --- | --- |
+| CUDA Driver | 10.2 |
+| CUDA Toolkit | 10.2 |
+| cuDNN | 8.2.1 for CUDA 10.2 |
+| Pytorch | 1.9.0 |
 
 # To Run
-First install all packages:
-```
-npm install
-```
 
-Then start:
+Before you start, install all dependencies and configure the Pytorch environment.
+
+Then run the demonstration:
 ```
-npm start
+$ cd py
+$ python demo.py
 ```
