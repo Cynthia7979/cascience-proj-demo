@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-import tensorflow as tf
 from VGG16 import VGG16
 from PIL import Image
 from cv2 import *
