@@ -15,7 +15,7 @@ An OpenCV implemented Python demonstration program planned to run locally that c
 
 | Dependencies or Related Modules | Current Version |
 | --- | --- |
-| CUDA Driver | 10.2 |
+| nVidia Driver | 460 |
 | CUDA Toolkit | 10.2 |
 | cuDNN | 8.2.1 for CUDA 10.2 |
 | Pytorch | 1.9.0 |
